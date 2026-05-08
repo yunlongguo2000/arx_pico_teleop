@@ -11,7 +11,7 @@
   <joint name="world_to_right_base" type="fixed">
     <parent link="world"/>
     <child link="right_base_link"/>
-    <origin xyz="0 -0.3 0" rpy="0 0 0"/>
+    <origin xyz="0 -0.415 0" rpy="0 0 0"/>
   </joint>
 
   <link name="right_base_link">
@@ -276,7 +276,7 @@
   <joint name="world_to_left_base" type="fixed">
     <parent link="world"/>
     <child link="left_base_link"/>
-    <origin xyz="0 0.3 0" rpy="0 0 0"/>
+    <origin xyz="0 0.415 0" rpy="0 0 0"/>
   </joint>
 
   <link name="left_base_link">
