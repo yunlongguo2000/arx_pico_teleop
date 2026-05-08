@@ -44,3 +44,7 @@ class ARXConfig(RobotConfig):
 
     # Camera configuration
     cameras: dict[str, CameraConfig] = field(default_factory=dict)
+
+    # Head camera extrinsic calibration
+    enable_calibration: bool = False
+    calibration_params_path: str = ""  # auto-detect if empty

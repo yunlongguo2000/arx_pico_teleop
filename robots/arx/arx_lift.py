@@ -15,6 +15,17 @@ from lerobot.utils.errors import DeviceNotConnectedError, DeviceAlreadyConnected
 from lerobot.robots.robot import Robot
 from .config_arx import ARXConfig
 
+try:
+    from algorithms.calibration import load_calibration_params
+    from algorithms.calibration.board_utils import create_gridboard, create_detector
+    from algorithms.calibration.pose_estimation import (
+        compute_head_camera_pose, compose_head_camera_pose, pose_to_7dof,
+    )
+
+    _CALIB_AVAILABLE = True
+except ImportError:
+    _CALIB_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -101,6 +112,49 @@ class ARXLift(Robot):
         # Performance monitoring
         self._perf = _PerfStats("main_loop", report_every=100)
 
+        # Head camera extrinsic calibration
+        self._calib_enabled = config.enable_calibration and _CALIB_AVAILABLE
+        self._calib_detector = None
+        self._calib_board = None
+        self._calib_camera_matrix = None
+        self._calib_dist_coeffs = None
+        self._calib_T_board_to_world = np.eye(4)
+        self._calib_head_image_key = "head_image"  # from camera config naming
+        self._calib_pose_7d = np.zeros(7, dtype=np.float32)
+        if self._calib_enabled:
+            try:
+                params = load_calibration_params(config.calibration_params_path)
+                bc = params["calibration_board"]
+                self._calib_board = create_gridboard(
+                    markers_x=bc["markers_x"], markers_y=bc["markers_y"],
+                    marker_length_m=bc["marker_length_m"],
+                    marker_separation_m=bc["marker_separation_m"],
+                    dictionary_name=bc["dictionary"],
+                )
+                self._calib_detector = create_detector(bc["dictionary"])
+                cc = params["cameras"]["head"]["intrinsics"]
+                self._calib_camera_matrix = np.array(
+                    [[cc["fx"], 0, cc["cx"]], [0, cc["fy"], cc["cy"]], [0, 0, 1]],
+                    dtype=np.float64,
+                )
+                self._calib_dist_coeffs = np.array(cc["dist_coeffs"], dtype=np.float64)
+                tw = params["T_board_to_world"]
+                if tw["translation_m"] != [0.0, 0.0, 0.0] or tw["quaternion_xyzw"] != [0.0, 0.0, 0.0, 1.0]:
+                    t = tw["translation_m"]
+                    q = tw["quaternion_xyzw"]
+                    qw, qx, qy, qz = q[3], q[0], q[1], q[2]
+                    R = np.array([
+                        [1 - 2*qy*qy - 2*qz*qz, 2*qx*qy - 2*qz*qw, 2*qx*qz + 2*qy*qw],
+                        [2*qx*qy + 2*qz*qw, 1 - 2*qx*qx - 2*qz*qz, 2*qy*qz - 2*qx*qw],
+                        [2*qx*qz - 2*qy*qw, 2*qy*qz + 2*qx*qw, 1 - 2*qx*qx - 2*qy*qy],
+                    ], dtype=np.float64)
+                    self._calib_T_board_to_world[:3, :3] = R
+                    self._calib_T_board_to_world[:3, 3] = t
+                logger.info(f"[CALIB] Calibration loaded (board: {bc['markers_x']}x{bc['markers_y']})")
+            except Exception as e:
+                logger.warning(f"[CALIB] Failed to load calibration: {e}")
+                self._calib_enabled = False
+
     def connect(self) -> None:
         if self.is_connected:
             raise DeviceAlreadyConnectedError(f"{self.name} is already connected.")
@@ -175,6 +229,10 @@ class ARXLift(Robot):
                 "chassis_height": float,
                 "chassis_head_yaw": float,
                 "chassis_head_pitch": float,
+            })
+        if self._calib_enabled:
+            ft.update({
+                **{f"head_camera_pose.{axis}": float for axis in ["x", "y", "z", "qx", "qy", "qz", "qw"]},
             })
         return ft
 
@@ -343,6 +401,24 @@ class ARXLift(Robot):
                 for future in as_completed(futures):
                     obs_dict[futures[future]] = future.result()
         _t_cam = time.perf_counter()
+
+        # Head camera extrinsic calibration (if enabled)
+        if self._calib_enabled:
+            head_img = obs_dict.get(self._calib_head_image_key)
+            if head_img is not None:
+                T_cam_world, num_markers = compute_head_camera_pose(
+                    head_img,
+                    self._calib_detector,
+                    self._calib_board,
+                    self._calib_camera_matrix,
+                    self._calib_dist_coeffs,
+                    self._calib_T_board_to_world,
+                )
+                if T_cam_world is not None:
+                    self._calib_pose_7d = pose_to_7dof(T_cam_world)
+            # Write 7-DoF pose to obs_dict
+            for i, axis in enumerate(["x", "y", "z", "qx", "qy", "qz", "qw"]):
+                obs_dict[f"head_camera_pose.{axis}"] = float(self._calib_pose_7d[i])
 
         # Record observation timing (will be combined with send_action in perf report)
         self._perf_obs_rpc = _t_rpc - _t0
