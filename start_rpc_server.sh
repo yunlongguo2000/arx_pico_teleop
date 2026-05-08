@@ -34,7 +34,7 @@ NC='\033[0m'
 # ── 路径 ──
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ARX_WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
-ROS2_BRIDGE_DIR="$SCRIPT_DIR/ros2_bridge"
+ROS2_BRIDGE_DIR="$ARX_WORKSPACE/ros2_bridge"
 
 # ── 日志 ──
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
