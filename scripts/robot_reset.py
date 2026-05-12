@@ -19,7 +19,7 @@ from pathlib import Path
 # Add package root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from robots.arx import ARXConfig, ARXLift2
+from robots.arx import ARXLift2Config, ARXLift2
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def main():
         robot_cfg = cfg.get("robot", {})
 
     # Create robot config
-    arx_config = ARXConfig(
+    arx_config = ARXLift2Config(
         left_can=robot_cfg.get("left_can", "can1"),
         right_can=robot_cfg.get("right_can", "can3"),
         arm_type=robot_cfg.get("arm_type", 0),

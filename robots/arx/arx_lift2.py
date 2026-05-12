@@ -13,7 +13,7 @@ from ros2_bridge.arx_ros2_rpc_client import ArxROS2RPCClient
 from lerobot.cameras import make_cameras_from_configs
 from lerobot.utils.errors import DeviceNotConnectedError, DeviceAlreadyConnectedError
 from lerobot.robots.robot import Robot
-from .config_arx import ARXConfig
+from .config_arx_lift2 import ARXLift2Config
 
 try:
     from algorithms.calibration import load_calibration_params
@@ -82,10 +82,10 @@ class ARXLift2(Robot):
         - No direct CAN or SDK calls - all abstracted through Bridge
     """
 
-    config_class = ARXConfig
+    config_class = ARXLift2Config
     name = "arx_lift2"
 
-    def __init__(self, config: ARXConfig):
+    def __init__(self, config: ARXLift2Config):
         super().__init__(config)
         self.cameras = make_cameras_from_configs(config.cameras)
 

@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any
 from scripts.utils.dataset_utils import generate_dataset_name, update_dataset_info
-from robots.arx import ARXConfig, ARXLift2
+from robots.arx import ARXLift2Config, ARXLift2
 from teleoperators.arx import ARXVRTeleopConfig, ARXVRTeleop
 from lerobot.cameras.configs import ColorMode, Cv2Rotation
 from lerobot.cameras.realsense.camera_realsense import RealSenseCameraConfig
@@ -498,7 +498,7 @@ def run_record(record_cfg: ARXRecordConfig):
         }
 
         # Create ARX robot configuration
-        robot_config = ARXConfig(
+        robot_config = ARXLift2Config(
             left_can=record_cfg.left_can,
             right_can=record_cfg.right_can,
             lift_can=record_cfg.lift_can,

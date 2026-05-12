@@ -4,10 +4,10 @@ from lerobot.cameras import CameraConfig
 from lerobot.robots.config import RobotConfig
 
 
-@RobotConfig.register_subclass("arx_lift_robot")
+@RobotConfig.register_subclass("arx_lift2_robot")
 @dataclass
-class ARXConfig(RobotConfig):
-    """Configuration for ARX LIFT robot (dual R5 arms + LIFT chassis)."""
+class ARXLift2Config(RobotConfig):
+    """Configuration for ARX LIFT2 robot (dual R5 arms + LIFT2 chassis)."""
 
     # CAN interface configuration
     left_can: str = "can1"

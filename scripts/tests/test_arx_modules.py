@@ -225,9 +225,9 @@ def test_robot_import():
 
     try:
         # Paths already added in test_teleop_import
-        from robots.arx import ARXLift2, ARXConfig
+        from robots.arx import ARXLift2, ARXLift2Config
         print("✓ ARXLift2 imported successfully")
-        print("✓ ARXConfig imported successfully")
+        print("✓ ARXLift2Config imported successfully")
 
         return True
 

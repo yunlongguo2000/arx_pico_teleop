@@ -22,7 +22,7 @@ from pathlib import Path
 
 import numpy as np
 from xrobotoolkit_teleop.common.xr_client import XrClient
-from robots.arx import ARXConfig, ARXLift2
+from robots.arx import ARXLift2Config, ARXLift2
 from teleoperators.arx import ARXVRTeleopConfig, ARXVRTeleop
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -110,7 +110,7 @@ def main():
     # ── Init robot (NO cameras) ──
     robot_cfg = cfg["robot"]
     robot_gripper = robot_cfg["gripper"]
-    robot_config = ARXConfig(
+    robot_config = ARXLift2Config(
         left_can=robot_cfg["left_can"],
         right_can=robot_cfg["right_can"],
         arm_type=robot_cfg["arm_type"],

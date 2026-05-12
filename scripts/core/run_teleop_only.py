@@ -7,7 +7,7 @@ Adapted from run_record_arx.py with all dataset recording removed.
 import yaml
 from pathlib import Path
 from typing import Dict, Any
-from robots.arx import ARXConfig, ARXLift2
+from robots.arx import ARXLift2Config, ARXLift2
 from teleoperators.arx import ARXVRTeleopConfig, ARXVRTeleop
 from lerobot.utils.control_utils import init_keyboard_listener
 from lerobot.utils.visualization_utils import init_rerun
@@ -195,7 +195,7 @@ def run_teleop(teleop_cfg):
         xr_client = XrClient()
 
         # Create configs
-        robot_config = ARXConfig(
+        robot_config = ARXLift2Config(
             left_can=teleop_cfg.left_can,
             right_can=teleop_cfg.right_can,
             lift_can=teleop_cfg.lift_can,
