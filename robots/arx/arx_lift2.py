@@ -181,11 +181,8 @@ class ARXLift2(Robot):
 
             logger.info(f"[ROBOT] Left R5 arm joint positions ({len(left_pos)} joints): {[round(p, 4) for p in left_pos]}")
             logger.info(f"[ROBOT] Right R5 arm joint positions ({len(right_pos)} joints): {[round(p, 4) for p in right_pos]}")
-            if self.cfg.enable_lift:
-                chassis_height = self.bridge.get_chassis_height()
-                logger.info(f"[CHASSIS] Current height: {chassis_height:.4f} m")
-            else:
-                logger.info("[CHASSIS] LIFT disabled - running arms-only mode")
+            chassis_height = self.bridge.get_chassis_height()
+            logger.info(f"[CHASSIS] Current height: {chassis_height:.4f} m")
             logger.info("===== [ROBOT] System connected successfully =====\n")
 
         except Exception as e:
@@ -223,13 +220,11 @@ class ARXLift2(Robot):
             # Gripper state
             "left_gripper_position": float,
             "right_gripper_position": float,
+            # Chassis state
+            "chassis_height": float,
+            "chassis_head_yaw": float,
+            "chassis_head_pitch": float,
         }
-        if self.cfg.enable_lift:
-            ft.update({
-                "chassis_height": float,
-                "chassis_head_yaw": float,
-                "chassis_head_pitch": float,
-            })
         if self._calib_enabled:
             ft.update({
                 **{f"head_camera_pose.{axis}": float for axis in ["x", "y", "z", "qx", "qy", "qz", "qw"]},
@@ -252,14 +247,12 @@ class ARXLift2(Robot):
             # Gripper commands
             "left_gripper_position": float,
             "right_gripper_position": float,
+            # Chassis commands
+            "chassis_vx": float,
+            "chassis_vy": float,
+            "chassis_wz": float,
+            "chassis_height": float,
         }
-        if self.cfg.enable_lift:
-            ft.update({
-                "chassis_vx": float,
-                "chassis_vy": float,
-                "chassis_wz": float,
-                "chassis_height": float,
-            })
         return ft
 
     def send_action(self, action: dict[str, Any]) -> dict[str, Any]:
@@ -287,12 +280,10 @@ class ARXLift2(Robot):
                     self._right_gripper_position = action["right_gripper_position"]
                     right_pos[6] = self._right_gripper_position * 5.0
 
-                vx = vy = wz = height = 0.0
-                if self.cfg.enable_lift:
-                    vx = action.get("chassis_vx", 0.0)
-                    vy = action.get("chassis_vy", 0.0)
-                    wz = action.get("chassis_wz", 0.0)
-                    height = action.get("chassis_height", 0.0)
+                vx = action.get("chassis_vx", 0.0)
+                vy = action.get("chassis_vy", 0.0)
+                wz = action.get("chassis_wz", 0.0)
+                height = action.get("chassis_height", 0.0)
 
                 self.bridge.set_full_command(left_pos, right_pos, vx, vy, wz, height)
 
@@ -387,11 +378,10 @@ class ARXLift2(Robot):
         obs_dict["left_gripper_position"] = float(state["left_arm"]["gripper"])
         obs_dict["right_gripper_position"] = float(state["right_arm"]["gripper"])
 
-        # Chassis state (only when LIFT is enabled)
-        if self.cfg.enable_lift:
-            obs_dict["chassis_height"] = float(state["chassis"]["height"])
-            obs_dict["chassis_head_yaw"] = float(state["chassis"]["head_yaw"])
-            obs_dict["chassis_head_pitch"] = float(state["chassis"]["head_pitch"])
+        # Chassis state
+        obs_dict["chassis_height"] = float(state["chassis"]["height"])
+        obs_dict["chassis_head_yaw"] = float(state["chassis"]["head_yaw"])
+        obs_dict["chassis_head_pitch"] = float(state["chassis"]["head_pitch"])
 
         # Capture images from cameras (parallel to reduce latency)
         _t_cam_start = time.perf_counter()
@@ -435,8 +425,7 @@ class ARXLift2(Robot):
         if self.bridge is not None:
             logger.info("Stopping robot movement...")
             try:
-                if self.cfg.enable_lift:
-                    self.bridge.set_chassis_velocity(0.0, 0.0, 0.0)
+                self.bridge.set_chassis_velocity(0.0, 0.0, 0.0)
                 # Hold arms at current position
                 left_pos = self.bridge.get_left_joint_positions()
                 right_pos = self.bridge.get_right_joint_positions()

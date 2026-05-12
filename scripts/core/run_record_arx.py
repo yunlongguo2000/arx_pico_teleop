@@ -503,7 +503,6 @@ def run_record(record_cfg: ARXRecordConfig):
             right_can=record_cfg.right_can,
             lift_can=record_cfg.lift_can,
             arm_type=record_cfg.arm_type,
-            enable_lift=record_cfg.enable_lift,
             num_joints=7,  # R5 has 7 joints
             dt=record_cfg.dt,
             left_init_joints=record_cfg.left_init_joints,
@@ -761,10 +760,14 @@ def run_record(record_cfg: ARXRecordConfig):
 def main():
     """Entry point for ARX LIFT recording."""
     parent_path = Path(__file__).resolve().parent
-    cfg_path = parent_path.parent / "config" / "cfg_arx.yaml"
+    default_cfg = parent_path.parent / "config" / "cfg_arx.yaml"
+    cfg_path = Path(os.environ.get("ARX_CONFIG", str(default_cfg)))
+    if not cfg_path.is_absolute():
+        cfg_path = (parent_path.parent / cfg_path).resolve()
     with open(cfg_path, "r") as f:
         cfg = yaml.safe_load(f)
 
+    logging.info(f"Loading config: {cfg_path}")
     record_cfg = ARXRecordConfig(cfg["record"])
     run_record(record_cfg)
 

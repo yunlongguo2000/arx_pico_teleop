@@ -51,7 +51,6 @@ def main():
         left_can=robot_cfg.get("left_can", "can1"),
         right_can=robot_cfg.get("right_can", "can3"),
         arm_type=robot_cfg.get("arm_type", 0),
-        enable_lift=robot_cfg.get("enable_lift", False),
         use_gripper=robot_cfg.get("use_gripper", True),
         debug=False
     )

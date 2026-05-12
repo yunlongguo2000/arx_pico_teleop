@@ -14,9 +14,6 @@ class ARXLift2Config(RobotConfig):
     right_can: str = "can3"
     lift_can: str = "can5"
 
-    # LIFT chassis toggle (set False when running arms-only without LIFT)
-    enable_lift: bool = True
-
     # Arm type (0=R5 L5, 1=R5 L5 Pro)
     arm_type: int = 0
 
