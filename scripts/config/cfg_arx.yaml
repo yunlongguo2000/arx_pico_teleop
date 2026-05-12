@@ -8,14 +8,14 @@ record:
     left_can: &left_can "can1"
     right_can: &right_can "can3"
     arm_type: &arm_type 0  # R5 type (0=L5, 1=L5 Pro)
-    enable_lift: &enable_lift false  # Set true when LIFT chassis is connected
+    robot_type: &robot_type "arx_r5"  # arx_r5=仅双臂, arx_lift2=双臂+LIFT2底盘
 
     # Initial joint positions (radians) - R5: 6 arm joints + 1 gripper
     left_init_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     right_init_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     dt: 0.05  # Control period (20Hz)
 
-    # LIFT chassis config (only used when enable_lift: true)
+    # LIFT chassis config (only used when robot_type: arx_lift2)
     # lift_can: "can5"
     # init_height: 0.24
     # chassis_mode: 2
@@ -51,7 +51,7 @@ record:
       servo_time: 0.017
       visualize_placo: false
 
-    # LIFT chassis scaling (only used when enable_lift: true)
+    # LIFT chassis scaling (only used when robot_type: arx_lift2)
     chassis:
       vx_scale: 2.0
       vy_scale: 2.0

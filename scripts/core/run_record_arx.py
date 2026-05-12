@@ -59,7 +59,7 @@ class ARXRecordConfig:
         self.right_can: str = robot["right_can"]
         self.lift_can: str = robot.get("lift_can", "can5")
         self.arm_type: int = robot["arm_type"]
-        self.enable_lift: bool = robot.get("enable_lift", True)
+        self.robot_type: str = robot.get("robot_type", "arx_r5")
         self.left_init_joints: list = robot["left_init_joints"]
         self.right_init_joints: list = robot["right_init_joints"]
         self.init_height: float = robot.get("init_height", 0.0)
@@ -271,7 +271,7 @@ def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift2, teleop:
     logging.info(f"Resetting to initial joint positions (duration={duration}s)...")
     logging.info(f"  Left target:  {record_cfg.left_init_joints}")
     logging.info(f"  Right target: {record_cfg.right_init_joints}")
-    if record_cfg.enable_lift:
+    if record_cfg.robot_type == "arx_lift2":
         logging.info(f"  Height target: {record_cfg.init_height}")
 
     target_left = np.array(record_cfg.left_init_joints, dtype=np.float64)
@@ -283,11 +283,11 @@ def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift2, teleop:
         state = robot.bridge.get_full_state()
         current_left = np.array(state["left_arm"]["joint_positions"], dtype=np.float64)
         current_right = np.array(state["right_arm"]["joint_positions"], dtype=np.float64)
-        current_height = float(state["chassis"]["height"]) if record_cfg.enable_lift else 0.0
+        current_height = float(state["chassis"]["height"]) if record_cfg.robot_type == "arx_lift2" else 0.0
     except Exception as e:
         logging.warning(f"无法读取当前状态，直接跳转: {e}")
         robot.bridge.set_dual_joint_positions(target_left, target_right)
-        if record_cfg.enable_lift:
+        if record_cfg.robot_type == "arx_lift2":
             robot.bridge.set_chassis_height(target_height)
         time.sleep(1.0)
         if not first_time:
@@ -308,7 +308,7 @@ def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift2, teleop:
         interp_left = current_left + alpha * (target_left - current_left)
         interp_right = current_right + alpha * (target_right - current_right)
 
-        if record_cfg.enable_lift:
+        if record_cfg.robot_type == "arx_lift2":
             interp_height = current_height + alpha * (target_height - current_height)
             robot.bridge.set_full_command(
                 interp_left, interp_right,
@@ -319,7 +319,7 @@ def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift2, teleop:
         time.sleep(dt)
 
     # 最终确认到达目标
-    if record_cfg.enable_lift:
+    if record_cfg.robot_type == "arx_lift2":
         robot.bridge.set_full_command(
             target_left, target_right,
             0.0, 0.0, 0.0, target_height
@@ -356,7 +356,7 @@ def reset_single_arm_to_init_position(
         state = robot.bridge.get_full_state()
         current_left = np.array(state["left_arm"]["joint_positions"], dtype=np.float64)
         current_right = np.array(state["right_arm"]["joint_positions"], dtype=np.float64)
-        current_height = float(state["chassis"]["height"]) if record_cfg.enable_lift else 0.0
+        current_height = float(state["chassis"]["height"]) if record_cfg.robot_type == "arx_lift2" else 0.0
     except Exception as e:
         logging.warning(f"无法读取当前状态，单臂复位退化为直接指令: {e}")
         try:
@@ -386,7 +386,7 @@ def reset_single_arm_to_init_position(
         else:
             interp_right = current_right + alpha * (target_right - current_right)
 
-        if record_cfg.enable_lift:
+        if record_cfg.robot_type == "arx_lift2":
             robot.bridge.set_full_command(interp_left, interp_right, 0.0, 0.0, 0.0, current_height)
         else:
             robot.bridge.set_dual_joint_positions(interp_left, interp_right)
@@ -399,7 +399,7 @@ def reset_single_arm_to_init_position(
         final_left = current_left
         final_right = target_right
 
-    if record_cfg.enable_lift:
+    if record_cfg.robot_type == "arx_lift2":
         robot.bridge.set_full_command(final_left, final_right, 0.0, 0.0, 0.0, current_height)
     else:
         robot.bridge.set_dual_joint_positions(final_left, final_right)
@@ -554,7 +554,7 @@ def run_record(record_cfg: ARXRecordConfig):
             trigger_threshold=record_cfg.trigger_threshold,
             close_position=record_cfg.teleop_close_position,
             open_position=record_cfg.teleop_open_position,
-            enable_lift=record_cfg.enable_lift,
+            enable_lift=record_cfg.robot_type == "arx_lift2",
             chassis_vx_scale=record_cfg.chassis_vx_scale,
             chassis_vy_scale=record_cfg.chassis_vy_scale,
             chassis_wz_scale=record_cfg.chassis_wz_scale,
