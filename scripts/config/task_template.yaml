@@ -1,0 +1,114 @@
+record:
+  repo_id: "deepcybo/r5_dual_arm_task/YOUR_REPO_NAME"
+  debug: &debug False  # if True, robot will not execute any actions
+  user_notes:
+  fps: 30
+
+  robot:
+    left_can: &left_can "can1"
+    right_can: &right_can "can3"
+    arm_type: &arm_type 0  # R5 type (0=L5, 1=L5 Pro)
+    robot_type: &robot_type "arx_r5"  # arx_r5=仅双臂, arx_lift2=双臂+LIFT2底盘
+
+    # Initial joint positions (radians) - R5: 6 arm joints + 1 gripper
+    left_init_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    right_init_joints: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    dt: 0.05  # Control period (20Hz)
+
+    # LIFT chassis config (only used when robot_type: arx_lift2)
+    # lift_can: "can5"
+    # init_height: 0.24
+    # chassis_mode: 2
+
+    gripper:
+      use_gripper: &use_gripper True
+      close_position: &gripper_close 1.0
+      open_position: &gripper_open 0.0
+
+  teleop:
+    control_mode: "vrteleop"
+    scale_factor: 0.8
+    R_headset_world: [-90, 0, 90]  # ZYX Euler angles in degrees
+    # 双臂安装朝向补偿: 绕 Z 轴的 yaw 角 (度)
+    #
+    # 作用: 在将 VR 控制器 delta 送入 Placo IK 之前, 对 delta_xyz / delta_rot
+    #       施加一个绕 Z 轴的旋转, 以补偿物理安装朝向与 URDF 坐标系的差异.
+    #       URDF (dual_R5a.urdf) 中两臂 base joint 的 rpy 均为 "0 0 0",
+    #       即 URDF 本身建模为平行安装; yaw_comp 仅用于弥补物理姿态差异.
+    #
+    # 平行安装 (两臂朝向相同, 当前配置):
+    #   物理安装与 URDF 一致, 无需补偿, 两值均置 0
+    #   comp = R(z, 0) = 单位旋转, 对 delta 无影响
+    left_arm_yaw_comp_deg: 0    # 平行安装: 无补偿
+    right_arm_yaw_comp_deg: 0   # 平行安装: 无补偿
+    #
+    # 相对安装 (两臂面对面, 若需切回请改为以下值):
+    #   left_arm_yaw_comp_deg: 90    # 左臂绕 Z 顺时针 +90°
+    #   right_arm_yaw_comp_deg: -90  # 右臂绕 Z 逆时针 -90°
+
+    placo:
+      robot_urdf_path: "assets/r5_urdf/dual_R5a.urdf"
+      servo_time: 0.017
+      visualize_placo: false
+
+    # LIFT chassis scaling (only used when robot_type: arx_lift2)
+    chassis:
+      vx_scale: 2.0
+      vy_scale: 2.0
+      wz_scale: 4.0
+      height_scale: 0.02
+      mode: 2
+
+    gripper:
+      trigger_reverse: True
+      trigger_threshold: 0.5
+      close_position: *gripper_close
+      open_position: *gripper_open
+
+    # 遥操平滑滤波 (缓解 VR 抖动 / IK 单帧跳变)
+    # pose_*: VR 原始位姿 One-Euro + slerp EMA; 调小 min_cutoff / quat_slerp_alpha => 更平滑
+    # joint_*: IK 解算后关节命令 EMA + 速度限制; 调小 joint_ema_alpha => 更平滑
+    smoothing:
+      enable_pose_filter: true
+      pose_min_cutoff: 0.8      # Hz, 越小越平滑
+      pose_beta: 0.08           # 越大快速运动延迟越小
+      pose_d_cutoff: 1.0
+      quat_slerp_alpha: 0.5     # [0,1], 1.0=不平滑
+      enable_joint_filter: true
+      joint_ema_alpha: 0.6      # [0,1], 1.0=不平滑
+      joint_max_velocity: 3.0   # rad/s, <=0 关闭限速
+
+  task:
+    description: "YOUR_TASK_DESCRIPTION_HERE"
+    num_episodes: 15
+    display: True
+    resume: False
+
+  time:
+    episode_time_sec: 60000
+    reset_time_sec: 15
+    save_meta_period: 1
+
+  cameras:
+    left_wrist_cam_serial: "218622274803"
+    right_wrist_cam_serial: "218622278394"
+    exterior_cam_serial: "218622271302"
+    width: 1280
+    height: 720
+
+  storage:
+    push_to_hub: False
+
+replay:
+  dataset_name: "deepcybo/r5_dual_arm_task/pick_handover_place_20260416_combined"
+  episode_idx: 0
+  debug: *debug
+  robot:
+    left_can: *left_can
+    right_can: *right_can
+    arm_type: *arm_type
+    use_gripper: *use_gripper
+
+visualize:
+  dataset_name: *repo_id
+  episode_index: 0

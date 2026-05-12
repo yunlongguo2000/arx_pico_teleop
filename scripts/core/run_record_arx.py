@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any
 from scripts.utils.dataset_utils import generate_dataset_name, update_dataset_info
-from robots.arx import ARXLift2Config, ARXLift2
+from robots.arx import ARXLift2Config, ARXLift2, ARXR5Config, ARXR5
 from teleoperators.arx import ARXVRTeleopConfig, ARXVRTeleop
 from lerobot.cameras.configs import ColorMode, Cv2Rotation
 from lerobot.cameras.realsense.camera_realsense import RealSenseCameraConfig
@@ -497,27 +497,42 @@ def run_record(record_cfg: ARXRecordConfig):
             "head_image": exterior_image_cfg,
         }
 
-        # Create ARX robot configuration
-        robot_config = ARXLift2Config(
-            left_can=record_cfg.left_can,
-            right_can=record_cfg.right_can,
-            lift_can=record_cfg.lift_can,
-            arm_type=record_cfg.arm_type,
-            num_joints=7,  # R5 has 7 joints
-            dt=record_cfg.dt,
-            left_init_joints=record_cfg.left_init_joints,
-            right_init_joints=record_cfg.right_init_joints,
-            init_height=record_cfg.init_height,
-            chassis_mode=record_cfg.chassis_mode,
-            use_gripper=record_cfg.use_gripper,
-            gripper_close=record_cfg.gripper_close,
-            gripper_open=record_cfg.gripper_open,
-            debug=record_cfg.debug,
-            cameras=camera_config
-        )
-
-        # Initialize robot first (dataset creation does not require XR teleop).
-        robot = ARXLift2(robot_config)
+        # Create ARX robot configuration based on robot type
+        if record_cfg.robot_type == "arx_r5":
+            robot_config = ARXR5Config(
+                left_can=record_cfg.left_can,
+                right_can=record_cfg.right_can,
+                arm_type=record_cfg.arm_type,
+                num_joints=7,
+                dt=record_cfg.dt,
+                left_init_joints=record_cfg.left_init_joints,
+                right_init_joints=record_cfg.right_init_joints,
+                use_gripper=record_cfg.use_gripper,
+                gripper_close=record_cfg.gripper_close,
+                gripper_open=record_cfg.gripper_open,
+                debug=record_cfg.debug,
+                cameras=camera_config,
+            )
+            robot = ARXR5(robot_config)
+        else:
+            robot_config = ARXLift2Config(
+                left_can=record_cfg.left_can,
+                right_can=record_cfg.right_can,
+                lift_can=record_cfg.lift_can,
+                arm_type=record_cfg.arm_type,
+                num_joints=7,
+                dt=record_cfg.dt,
+                left_init_joints=record_cfg.left_init_joints,
+                right_init_joints=record_cfg.right_init_joints,
+                init_height=record_cfg.init_height,
+                chassis_mode=record_cfg.chassis_mode,
+                use_gripper=record_cfg.use_gripper,
+                gripper_close=record_cfg.gripper_close,
+                gripper_open=record_cfg.gripper_open,
+                debug=record_cfg.debug,
+                cameras=camera_config,
+            )
+            robot = ARXLift2(robot_config)
 
         # Configure dataset features
         action_features = hw_to_dataset_features(robot.action_features, "action")

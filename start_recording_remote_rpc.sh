@@ -30,7 +30,16 @@ PROJECT_ROOT="$SCRIPT_DIR"
 # 与 start_recording.sh 一致；若你的工程不在默认路径，请 export ARX_WORKSPACE
 ARX_WORKSPACE="${ARX_WORKSPACE:-/home/arx/ARX_new}"
 ARX_ROS2_WS="${ARX_ROS2_WS:-$ARX_WORKSPACE/ros2_ws}"
-CONFIG_FILE="$PROJECT_ROOT/scripts/config/cfg_arx.yaml"
+
+# 优先使用环境变量指定的配置文件，否则使用默认路径
+DEFAULT_CONFIG="$PROJECT_ROOT/scripts/config/cfg_arx.yaml"
+CONFIG_FILE="${ARX_CONFIG:-$DEFAULT_CONFIG}"
+
+# 如果用户提供了相对路径，将其转为绝对路径（相对于项目根目录）
+if [[ "$CONFIG_FILE" != /* ]]; then
+    CONFIG_FILE="$PROJECT_ROOT/$CONFIG_FILE"
+fi
+
 LOG_DIR="$PROJECT_ROOT/.log"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 DATACOL_LOG="$LOG_DIR/data_collection_remote_${TIMESTAMP}.log"
@@ -251,6 +260,7 @@ export PYTHONPATH="$PROJECT_ROOT:${PYTHONPATH:-}"
         export LD_LIBRARY_PATH=\"${LD_LIBRARY_PATH:-}\"
         export ARX_RPC_HOST=\"$ARX_RPC_HOST\"
         export ARX_RPC_PORT=\"$ARX_RPC_PORT\"
+        export ARX_CONFIG=\"$CONFIG_FILE\"
         python3 scripts/core/run_record_arx.py
     "
 ) 2>&1 | tee -a "$DATACOL_LOG"
