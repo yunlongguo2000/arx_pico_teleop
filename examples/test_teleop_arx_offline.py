@@ -141,8 +141,8 @@ class MockBridge:
         self.chassis_height = float(height)
 
 
-class MockARXLift:
-    """Mock ARXLift robot for testing."""
+class MockARXLift2:
+    """Mock ARXLift2 robot for testing."""
 
     def __init__(self):
         self.bridge = MockBridge()
@@ -203,7 +203,7 @@ def main():
     # ── 3. Set robot reference test ──────────────────────────────────────
     print_header("Test 3: Set robot reference")
     try:
-        robot = MockARXLift()
+        robot = MockARXLift2()
         # Set some initial joint positions
         robot.bridge.set_joint_positions(
             np.array([0.1, -0.2, 0.3, -0.1, 0.2, -0.1, 0.0]),

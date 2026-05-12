@@ -220,13 +220,13 @@ def test_teleop_import():
 def test_robot_import():
     """Test 6: Import robot module."""
     print("\n" + "=" * 60)
-    print("TEST 6: ARXLift Import")
+    print("TEST 6: ARXLift2 Import")
     print("=" * 60)
 
     try:
         # Paths already added in test_teleop_import
-        from robots.arx import ARXLift, ARXConfig
-        print("✓ ARXLift imported successfully")
+        from robots.arx import ARXLift2, ARXConfig
+        print("✓ ARXLift2 imported successfully")
         print("✓ ARXConfig imported successfully")
 
         return True

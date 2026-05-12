@@ -9,7 +9,7 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any
 from scripts.utils.dataset_utils import generate_dataset_name, update_dataset_info
-from robots.arx import ARXConfig, ARXLift
+from robots.arx import ARXConfig, ARXLift2
 from teleoperators.arx import ARXVRTeleopConfig, ARXVRTeleop
 from lerobot.cameras.configs import ColorMode, Cv2Rotation
 from lerobot.cameras.realsense.camera_realsense import RealSenseCameraConfig
@@ -260,7 +260,7 @@ def listen_xrclient_reset_buttons(xr_client: XrClient, events: Dict[str, Any], s
         time.sleep(0.05)
 
 
-def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift, teleop: ARXVRTeleop, first_time: bool = True, duration: float = 3.0):
+def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift2, teleop: ARXVRTeleop, first_time: bool = True, duration: float = 3.0):
     """Reset robot to initial joint positions with smooth interpolation.
 
     Args:
@@ -336,7 +336,7 @@ def reset_to_init_position(record_cfg: ARXRecordConfig, robot: ARXLift, teleop: 
 
 def reset_single_arm_to_init_position(
     record_cfg: ARXRecordConfig,
-    robot: ARXLift,
+    robot: ARXLift2,
     teleop: ARXVRTeleop,
     arm_side: str,
     duration: float = 2.0,
@@ -411,7 +411,7 @@ def reset_single_arm_to_init_position(
 def handle_single_arm_reset_requests(
     events: Dict[str, Any],
     record_cfg: ARXRecordConfig,
-    robot: ARXLift,
+    robot: ARXLift2,
     teleop: ARXVRTeleop,
     clear_episode_buffer_cb=None,
 ) -> bool:
@@ -518,7 +518,7 @@ def run_record(record_cfg: ARXRecordConfig):
         )
 
         # Initialize robot first (dataset creation does not require XR teleop).
-        robot = ARXLift(robot_config)
+        robot = ARXLift2(robot_config)
 
         # Configure dataset features
         action_features = hw_to_dataset_features(robot.action_features, "action")

@@ -63,7 +63,7 @@ class _PerfStats:
             self._maxs.clear()
 
 
-class ARXLift(Robot):
+class ARXLift2(Robot):
     """
     ARX LIFT2 robot class using ROS2 Bridge for hardware abstraction.
     Extends LeRobot's Robot base class.

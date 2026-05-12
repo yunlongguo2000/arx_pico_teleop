@@ -22,7 +22,7 @@ from pathlib import Path
 
 import numpy as np
 from xrobotoolkit_teleop.common.xr_client import XrClient
-from robots.arx import ARXConfig, ARXLift
+from robots.arx import ARXConfig, ARXLift2
 from teleoperators.arx import ARXVRTeleopConfig, ARXVRTeleop
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -125,7 +125,7 @@ def main():
         debug=False,
         cameras={},  # <-- NO cameras
     )
-    robot = ARXLift(robot_config)
+    robot = ARXLift2(robot_config)
 
     # ── Connect ──
     logger.info("Connecting to RPC server (localhost:4242)...")

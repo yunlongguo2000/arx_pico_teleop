@@ -10,7 +10,7 @@ CAN bus: can1 for left, can3 for right.
 Architecture Note:
     This teleoperator receives a robot reference from the main recording
     script via set_robot_reference(). This ensures:
-    1. Only one ZeroRPC connection to the robot (in ARXLift)
+    1. Only one ZeroRPC connection to the robot (in ARXLift2)
     2. Teleop reads current state via robot.bridge
     3. Commands are sent only via robot.send_action() in the record loop
 
@@ -38,7 +38,7 @@ from xrobotoolkit_teleop.utils.geometry import apply_delta_pose, quat_diff_as_an
 import meshcat.transformations as tf
 
 if TYPE_CHECKING:
-    from robots.arx import ARXLift
+    from robots.arx import ARXLift2
 
 _EE_AXES = ["x", "y", "z", "roll", "pitch", "yaw"]
 
@@ -111,7 +111,7 @@ class ARXVRTeleop(Teleoperator):
         self._num_joints = 7
 
         # Robot reference (set via set_robot_reference before connect)
-        self._robot: "ARXLift" = None
+        self._robot: "ARXLift2" = None
         self.manipulator_config = DEFAULT_MANIPULATOR_CONFIG
 
         # Placo IK state
@@ -203,7 +203,7 @@ class ARXVRTeleop(Teleoperator):
     def is_calibrated(self) -> bool:
         pass
 
-    def set_robot_reference(self, robot: "ARXLift") -> None:
+    def set_robot_reference(self, robot: "ARXLift2") -> None:
         """
         Set robot reference for reading current state.
 
@@ -211,7 +211,7 @@ class ARXVRTeleop(Teleoperator):
         The teleoperator uses the robot's Bridge to read current state.
 
         Args:
-            robot: The ARXLift robot instance (must be connected)
+            robot: The ARXLift2 robot instance (must be connected)
         """
         if not robot.is_connected:
             raise RuntimeError("Robot must be connected before setting reference")

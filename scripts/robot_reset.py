@@ -19,7 +19,7 @@ from pathlib import Path
 # Add package root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from robots.arx import ARXConfig, ARXLift
+from robots.arx import ARXConfig, ARXLift2
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ def main():
         )
 
     logger.info(f"Connecting to robot at {os.environ.get('ARX_RPC_HOST', 'localhost')}...")
-    robot = ARXLift(arx_config)
+    robot = ARXLift2(arx_config)
     robot.connect()
 
     logger.info(f"Left init: {[round(x, 4) for x in arx_config.left_init_joints]}")
