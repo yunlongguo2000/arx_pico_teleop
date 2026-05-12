@@ -65,7 +65,7 @@ class _PerfStats:
 
 class ARXLift(Robot):
     """
-    ARX LIFT robot class using ROS2 Bridge for hardware abstraction.
+    ARX LIFT2 robot class using ROS2 Bridge for hardware abstraction.
     Extends LeRobot's Robot base class.
 
     R5/X5lite arms have 6 arm joints + 1 gripper (7 total from SDK).
@@ -83,7 +83,7 @@ class ARXLift(Robot):
     """
 
     config_class = ARXConfig
-    name = "arx_lift"
+    name = "arx_lift2"
 
     def __init__(self, config: ARXConfig):
         super().__init__(config)
