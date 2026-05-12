@@ -93,8 +93,8 @@ record:
     left_wrist_cam_serial: "218622274803"
     right_wrist_cam_serial: "218622278394"
     exterior_cam_serial: "218622271302"
-    width: 640
-    height: 480
+    width: 1280
+    height: 720
 
   storage:
     push_to_hub: False

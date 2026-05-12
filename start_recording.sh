@@ -298,16 +298,16 @@ gnome-terminal --tab --title="ARX-DataCollection" -- bash -c "
 
     # 先验证conda环境里的Python是否能导入lerobot
     echo '检查conda环境里的lerobot...' | tee -a '$DATACOL_LOG'
-    if ! conda run -n ur_data python3 -c 'import lerobot; print(\"✅ lerobot已安装:\", lerobot.__file__)' 2>&1 | tee -a '$DATACOL_LOG'; then
-        echo '❌ ur_data环境里没有安装lerobot！' | tee -a '$DATACOL_LOG'
-        echo '请在激活ur_data环境后运行: pip install lerobot' | tee -a '$DATACOL_LOG'
+    if ! conda run -n data_collection python3 -c 'import lerobot; print(\"✅ lerobot已安装:\", lerobot.__file__)' 2>&1 | tee -a '$DATACOL_LOG'; then
+        echo '❌ data_collection环境里没有安装lerobot！' | tee -a '$DATACOL_LOG'
+        echo '请在激活data_collection环境后运行: pip install lerobot' | tee -a '$DATACOL_LOG'
         read -p '按Enter键关闭终端'
         exit 1
     fi
 
     # 检查其他依赖
     for MOD in numpy scipy yaml xrobotoolkit_teleop; do
-        if ! conda run -n ur_data python3 -c \"import \$MOD\" 2>/dev/null; then
+        if ! conda run -n data_collection python3 -c \"import \$MOD\" 2>/dev/null; then
             echo '❌ 模块' \$MOD '未安装' | tee -a '$DATACOL_LOG'
             read -p '按Enter键关闭终端'
             exit 1
@@ -315,14 +315,14 @@ gnome-terminal --tab --title="ARX-DataCollection" -- bash -c "
     done
     echo '✅ 所有 Python 依赖已安装' | tee -a '$DATACOL_LOG'
 
-    # 用conda run直接运行，确保在ur_data环境里
+    # 用conda run直接运行，确保在data_collection环境里
     cd $PROJECT_ROOT
     export PYTHONPATH=\"$PROJECT_ROOT:\$PYTHONPATH\"
     echo '✅ 准备运行数据采集程序' | tee -a '$DATACOL_LOG'
     echo '' | tee -a '$DATACOL_LOG'
 
-    # 用conda run -n ur_data运行，确保在正确的环境里
-    conda run -n ur_data --no-capture-output bash -c \"
+    # 用conda run -n data_collection运行，确保在正确的环境里
+    conda run -n data_collection --no-capture-output bash -c \"
         source /opt/ros/jazzy/setup.bash
         source $ARX_WORKSPACE/ros2_ws/install/setup.bash
         cd $PROJECT_ROOT

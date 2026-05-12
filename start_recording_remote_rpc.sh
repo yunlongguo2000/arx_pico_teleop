@@ -3,7 +3,7 @@
 # 仅在「数采电脑」上启动数据采集：通过 TCP 连接「控制电脑」上已运行的 RPC 服务端
 # （控制端需已启动：双臂控制器 + arx_ros2_rpc_server.py，默认监听 tcp://*:4242）
 #
-# 本机需要：conda 环境 ur_data、RealSense 相机、VR/遥操作相关依赖；不需要本机 CAN/双臂 ROS 节点。
+# 本机需要：conda 环境 data_collection、RealSense 相机、VR/遥操作相关依赖；不需要本机 CAN/双臂 ROS 节点。
 #
 # 用法:
 #   export ARX_RPC_HOST=192.168.x.x   # 可选，也可作为第一个参数传入
@@ -119,13 +119,13 @@ if ! command -v conda >/dev/null 2>&1; then
     log_err "未找到 conda"
     exit 1
 fi
-if ! conda info --envs 2>/dev/null | grep -q "ur_data"; then
-    log_err "conda 环境 ur_data 不存在"
+if ! conda info --envs 2>/dev/null | grep -q "data_collection"; then
+    log_err "conda 环境 data_collection 不存在"
     exit 1
 fi
-log_ok "conda 环境: ur_data"
+log_ok "conda 环境: data_collection"
 
-UR_DATA_PYTHON=$(conda run -n ur_data which python3)
+UR_DATA_PYTHON=$(conda run -n data_collection which python3)
 log_ok "Python: $UR_DATA_PYTHON"
 
 if [ -n "${XR_SDK_LIB_DIR:-}" ]; then
@@ -181,22 +181,22 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 # ---------- 依赖（在 tee 之前检查，便于看到彩色日志）----------
-if ! conda run -n ur_data python3 -c 'import lerobot' 2>/dev/null; then
-    log_err "ur_data 中无法 import lerobot，请先 pip install"
+if ! conda run -n data_collection python3 -c 'import lerobot' 2>/dev/null; then
+    log_err "data_collection 中无法 import lerobot，请先 pip install"
     exit 1
 fi
 
 for MOD in numpy scipy yaml xrobotoolkit_teleop; do
-    if ! conda run -n ur_data python3 -c "import $MOD" 2>/dev/null; then
+    if ! conda run -n data_collection python3 -c "import $MOD" 2>/dev/null; then
         log_err "缺少 Python 模块: $MOD"
         exit 1
     fi
 done
 
 for MOD in zerorpc gevent; do
-    if ! conda run -n ur_data python3 -c "import $MOD" 2>/dev/null; then
+    if ! conda run -n data_collection python3 -c "import $MOD" 2>/dev/null; then
         log_err "缺少 ZeroRPC 依赖模块: $MOD"
-        log_info "请在 ur_data 环境安装: conda run -n ur_data pip install zerorpc gevent"
+        log_info "请在 data_collection 环境安装: conda run -n data_collection pip install zerorpc gevent"
         exit 1
     fi
 done
@@ -238,7 +238,7 @@ export PYTHONPATH="$PROJECT_ROOT:${PYTHONPATH:-}"
     echo ""
 
     # 数采机若无本地 ROS2 工作空间，可跳过；有则与原版一致供可能的依赖使用
-    conda run -n ur_data --no-capture-output bash -c "
+    conda run -n data_collection --no-capture-output bash -c "
         set -e
         if [ -f /opt/ros/jazzy/setup.bash ] && [ -f \"$ARX_ROS2_WS/install/setup.bash\" ]; then
             source /opt/ros/jazzy/setup.bash
