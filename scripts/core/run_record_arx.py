@@ -215,17 +215,31 @@ class LocalTerminalKeyListener:
 
                 if key == "\x1b":
                     seq = key
-                    for _ in range(2):
-                        ready2, _, _ = select.select([self._fd], [], [], 0.005)
+                    # 用更长的超时 (50ms) 读取完整的转义序列，避免在系统繁忙时
+                    # 只读到部分序列而误判按键（如 \x1b[C → 被截断为 \x1b[ → Esc）
+                    for _ in range(3):
+                        ready2, _, _ = select.select([self._fd], [], [], 0.05)
                         if ready2:
                             seq += os.read(self._fd, 1).decode("utf-8", errors="ignore")
+                        else:
+                            break
 
                     if seq == "\x1b[C":
+                        logging.info("stdin: 检测到右键 (→) — 结束当前阶段")
                         self.events["exit_early"] = True
                     elif seq == "\x1b[D":
+                        logging.info("stdin: 检测到左键 (←) — 重录当前 episode")
                         self.events["rerecord_episode"] = True
                         self.events["exit_early"] = True
+                    elif seq == "\x1b":
+                        logging.info("stdin: 检测到 Esc — 停止录制")
+                        self.events["stop_recording"] = True
+                        self.events["exit_early"] = True
                     else:
+                        logging.info(
+                            "stdin: 未识别的转义序列 (len=%d, repr=%s) — 视为停止录制",
+                            len(seq), repr(seq),
+                        )
                         self.events["stop_recording"] = True
                         self.events["exit_early"] = True
         except Exception as e:
@@ -425,8 +439,10 @@ def handle_single_arm_reset_requests(
         clear_episode_buffer_cb()
 
     if reset_right:
+        logging.info("handle_single_arm_reset: 复位右臂")
         reset_single_arm_to_init_position(record_cfg, robot, teleop, arm_side="right")
     if reset_left:
+        logging.info("handle_single_arm_reset: 复位左臂")
         reset_single_arm_to_init_position(record_cfg, robot, teleop, arm_side="left")
 
     events["reset_left_arm"] = False
@@ -651,7 +667,12 @@ def run_record(record_cfg: ARXRecordConfig):
                 continue
 
             if events["rerecord_episode"]:
-                logging.info("Re-recording episode")
+                logging.info(
+                    "Re-recording episode (trigger: rerecord_episode=%s, reset_left=%s, reset_right=%s)",
+                    events.get("rerecord_episode"),
+                    events.get("reset_left_arm"),
+                    events.get("reset_right_arm"),
+                )
                 events["rerecord_episode"] = False
                 events["exit_early"] = False
                 dataset.clear_episode_buffer()

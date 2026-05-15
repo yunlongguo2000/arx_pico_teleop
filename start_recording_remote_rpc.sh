@@ -19,6 +19,10 @@
 
 set -e
 
+# 清除 HTTP/SOCKS 代理环境变量，避免 libPXREARobotSDK 的 gRPC 流量被路由到
+# 本地代理（如 Clash/mihomo），导致 gRPC 双向流无法正常工作，VR 数据无法接收。
+unset HTTP_PROXY http_proxy HTTPS_PROXY https_proxy ALL_PROXY all_proxy
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
