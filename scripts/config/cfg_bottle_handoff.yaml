@@ -80,7 +80,7 @@ record:
 
   task:
     description: "Hand the bottle from the left arm to the right arm and place it in the basket on the right."
-    num_episodes: 15
+    num_episodes: 5
     display: True
     resume: False
 
