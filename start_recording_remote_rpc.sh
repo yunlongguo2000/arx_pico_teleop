@@ -14,7 +14,7 @@
 #   bash start_recording_remote_rpc.sh 192.168.1.100 debug 4242
 #   ARX_RPC_HOST=10.0.0.5 ARX_RPC_PORT=4242 bash start_recording_remote_rpc.sh record
 #
-# 网络: 控制机防火墙需放行 RPC 端口（默认 4242/TCP），且 ZeroRPC 服务端需绑定为 0.0.0.0（见 ARX_new/services/rpc 服务端）。
+# 网络: 控制机防火墙需放行 RPC 端口（默认 4242/TCP），且 ZeroRPC 服务端需绑定为 0.0.0.0（见 arx-platform/services/rpc 服务端）。
 ################################################################################
 
 set -e
@@ -32,7 +32,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
 # 与 start_recording.sh 一致；若你的工程不在默认路径，请 export ARX_WORKSPACE
-ARX_WORKSPACE="${ARX_WORKSPACE:-/home/arx/ARX_new}"
+ARX_WORKSPACE="${ARX_WORKSPACE:-${ARX_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}}"
 ARX_ROS2_WS="${ARX_ROS2_WS:-$ARX_WORKSPACE/ros2_ws}"
 
 # 优先使用环境变量指定的配置文件，否则使用默认路径
