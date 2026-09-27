@@ -14,13 +14,10 @@ Usage:
 import sys
 import os
 
-# Add SDK paths at the very beginning (using shared python_sdk directory)
-_script_dir = os.path.dirname(os.path.abspath(__file__))
-_scripts_dir = os.path.dirname(_script_dir)
-_project_root = os.path.dirname(_scripts_dir)
-_lerobot_data_root = os.path.dirname(_project_root)
-_arx_root = os.path.dirname(_lerobot_data_root)
-_r5_sdk_path = os.path.join(_arx_root, "legacy", "python_sdk", "arx_r5_sdk")
+# Optional vendor SDK; restored outside the platform checkout.
+from pathlib import Path
+from arx_platform.paths import external_root
+_r5_sdk_path = str(Path(os.environ.get('ARX_SDK_ROOT', external_root() / 'python_sdk')) / 'arx_r5_sdk')
 sys.path.insert(0, _r5_sdk_path)
 sys.path.insert(0, os.path.join(_r5_sdk_path, "bimanual", "api"))
 

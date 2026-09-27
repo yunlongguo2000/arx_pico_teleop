@@ -1,51 +1,13 @@
-#!/bin/bash
-# Safe ARX module tests - NO hardware connection
-# This script sets up the proper environment and runs the Python tests
-
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# Using shared python_sdk directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")"
-LEROBOT_DATA_ROOT="$(dirname "$PROJECT_ROOT")"
-ARX_ROOT="$(dirname "$LEROBOT_DATA_ROOT")"
-ARX_SDK_DIR="${ARX_ROOT}/python_sdk/arx_r5_sdk"
-
-echo "========================================"
-echo "ARX VR Teleop Module Tests"
-echo "========================================"
-echo ""
-
-# Check if SDK directory exists
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SDK_ROOT="${ARX_SDK_ROOT:-${ARX_EXTERNAL_ROOT:-$HOME/.cache/arx}/python_sdk}"
+ARX_SDK_DIR="$SDK_ROOT/arx_r5_sdk"
 if [ ! -d "$ARX_SDK_DIR" ]; then
-    echo "❌ ERROR: ARX SDK not found at $ARX_SDK_DIR"
+    echo "SDK absent: $ARX_SDK_DIR"
+    printf 'Run arx-restore python-sdk --destination "%s" in the ARX workspace.\n' "$SDK_ROOT"
     exit 1
 fi
-
-# Set LD_LIBRARY_PATH for SDK shared libraries
-echo "Setting up LD_LIBRARY_PATH..."
-export LD_LIBRARY_PATH="${ARX_SDK_DIR}/bimanual/api/arx_r5_src:${LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH="${ARX_SDK_DIR}/bimanual/api:${LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH="${ARX_SDK_DIR}/bimanual/api/arx_r5_python:${LD_LIBRARY_PATH}"
-export LD_LIBRARY_PATH="/opt/ros/jazzy/lib:${LD_LIBRARY_PATH}"
-
-echo "LD_LIBRARY_PATH set."
-echo ""
-
-# Run tests
-cd "$SCRIPT_DIR"
-python3 test_arx_modules.py
-
-exit_code=$?
-
-echo ""
-if [ $exit_code -eq 0 ]; then
-    echo "========================================"
-    echo "✓ All tests passed!"
-    echo "========================================"
-else
-    echo "========================================"
-    echo "❌ Some tests failed!"
-    echo "========================================"
-fi
-
-exit $exit_code
+export ARX_SDK_ROOT="$SDK_ROOT"
+export LD_LIBRARY_PATH="$ARX_SDK_DIR/bimanual/api/arx_r5_src:$ARX_SDK_DIR/bimanual/api:$ARX_SDK_DIR/bimanual/api/arx_r5_python:/opt/ros/jazzy/lib:${LD_LIBRARY_PATH:-}"
+exec python3 "$SCRIPT_DIR/test_arx_modules.py"
