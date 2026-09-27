@@ -20,7 +20,7 @@ _scripts_dir = os.path.dirname(_script_dir)
 _project_root = os.path.dirname(_scripts_dir)
 _lerobot_data_root = os.path.dirname(_project_root)
 _arx_root = os.path.dirname(_lerobot_data_root)
-_r5_sdk_path = os.path.join(_arx_root, "python_sdk", "arx_r5_sdk")
+_r5_sdk_path = os.path.join(_arx_root, "legacy", "python_sdk", "arx_r5_sdk")
 sys.path.insert(0, _r5_sdk_path)
 sys.path.insert(0, os.path.join(_r5_sdk_path, "bimanual", "api"))
 

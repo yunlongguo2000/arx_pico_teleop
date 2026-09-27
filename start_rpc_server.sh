@@ -15,7 +15,7 @@
 # 停止: Ctrl+C (自动清理所有子进程)
 #
 # 远程连接示例 (工作站侧):
-#   from ros2_bridge.arx_ros2_rpc_client import ArxROS2RPCClient
+#   from arx_client import ArxROS2RPCClient
 #   client = ArxROS2RPCClient(ip="<robot_ip>", port=4242)
 #   client.system_connect()
 #   state = client.get_full_state()
@@ -33,8 +33,8 @@ NC='\033[0m'
 
 # ── 路径 ──
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ARX_WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
-ROS2_BRIDGE_DIR="$ARX_WORKSPACE/ros2_bridge"
+ARX_WORKSPACE="${ARX_WORKSPACE:-${ARX_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}}"
+ROS2_BRIDGE_DIR="$ARX_WORKSPACE/services/rpc"
 
 # ── 日志 ──
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
@@ -121,8 +121,8 @@ fi
 log_success "ZeroRPC 依赖检查通过 (zerorpc/gevent)"
 
 # RPC 服务端脚本
-if [ ! -f "$ROS2_BRIDGE_DIR/arx_ros2_rpc_server.py" ]; then
-    log_error "未找到 RPC 服务端: $ROS2_BRIDGE_DIR/arx_ros2_rpc_server.py"
+if [ ! -f "$ROS2_BRIDGE_DIR/server.py" ]; then
+    log_error "未找到 RPC 服务端: $ROS2_BRIDGE_DIR/server.py"
     exit 1
 fi
 
@@ -171,5 +171,5 @@ log_info "等待远程客户端连接 tcp://0.0.0.0:4242 ..."
 echo ""
 echo "────────────────────────────────────────────────────────────"
 
-cd "$ROS2_BRIDGE_DIR"
-python3 arx_ros2_rpc_server.py --arms-only
+cd "$ARX_WORKSPACE"
+python3 -m services.rpc.server --arms-only

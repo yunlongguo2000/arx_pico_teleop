@@ -24,7 +24,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
 ARX_WORKSPACE="${ARX_WORKSPACE:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 ARX_ROS2_WS="${ARX_ROS2_WS:-$ARX_WORKSPACE/ros2_ws}"
-RPC_BRIDGE_DIR="$PROJECT_ROOT/ros2_bridge"
+RPC_BRIDGE_DIR="$ARX_WORKSPACE/services/rpc"
 
 LOG_DIR="$PROJECT_ROOT/.log"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
@@ -118,7 +118,7 @@ gnome-terminal --tab --title="ARX-Controllers" -- bash -c "
     if ! ss -tuln 2>/dev/null | grep -q ':4242 '; then
         echo '启动 RPC 服务端 (arms-only)...' | tee -a '$CTRL_LOG'
         cd $RPC_BRIDGE_DIR
-        python3 arx_ros2_rpc_server.py --arms-only 2>&1 | tee -a '$CTRL_LOG'
+        python3 -m services.rpc.server --arms-only 2>&1 | tee -a '$CTRL_LOG'
     else
         echo '⚠️  RPC 服务端已在运行' | tee -a '$CTRL_LOG'
         read -p '按Enter键关闭终端'

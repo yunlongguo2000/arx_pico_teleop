@@ -1,7 +1,7 @@
 #!/bin/bash
 ################################################################################
 # 仅在「数采电脑」上启动数据采集：通过 TCP 连接「控制电脑」上已运行的 RPC 服务端
-# （控制端需已启动：双臂控制器 + arx_ros2_rpc_server.py，默认监听 tcp://*:4242）
+# （控制端需已启动：双臂控制器 + server.py，默认监听 tcp://*:4242）
 #
 # 本机需要：conda 环境 data_collection、RealSense 相机、VR/遥操作相关依赖；不需要本机 CAN/双臂 ROS 节点。
 #
@@ -14,7 +14,7 @@
 #   bash start_recording_remote_rpc.sh 192.168.1.100 debug 4242
 #   ARX_RPC_HOST=10.0.0.5 ARX_RPC_PORT=4242 bash start_recording_remote_rpc.sh record
 #
-# 网络: 控制机防火墙需放行 RPC 端口（默认 4242/TCP），且 ZeroRPC 服务端需绑定为 0.0.0.0（见 ros2_bridge 服务端）。
+# 网络: 控制机防火墙需放行 RPC 端口（默认 4242/TCP），且 ZeroRPC 服务端需绑定为 0.0.0.0（见 ARX_new/services/rpc 服务端）。
 ################################################################################
 
 set -e

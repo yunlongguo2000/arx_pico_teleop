@@ -16,7 +16,8 @@ setup(
     include_package_data=True,
     install_requires=[
     "send2trash",
-    "zerorpc"
+    "zerorpc",
+    "arx-client>=0.1.0,<0.2"
     ],
     scripts=[
         "scripts/tools/map_gripper.sh",

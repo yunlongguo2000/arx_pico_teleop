@@ -27,8 +27,8 @@ NC='\033[0m' # No Color
 # 脚本路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
-ARX_WORKSPACE="$(cd "$SCRIPT_DIR/../.." && pwd)"
-ZERORPC_DIR="$ARX_WORKSPACE/ros2_bridge"
+ARX_WORKSPACE="${ARX_WORKSPACE:-${ARX_ROOT:-$(cd "$SCRIPT_DIR/../.." && pwd)}}"
+ZERORPC_DIR="$ARX_WORKSPACE/services/rpc"
 
 # 运行模式 (默认: debug)
 RUN_MODE="${1:-debug}"
@@ -72,7 +72,7 @@ cleanup() {
     log_info "清理资源..."
 
     # 查找所有与ARX相关的进程
-    for PID in $(pgrep -f "arx_ros2_rpc_server.py\|arx_lift_controller\|arx_r5_controller\|xrobotoolkit_teleop"); do
+    for PID in $(pgrep -f "server.py\|arx_lift_controller\|arx_r5_controller\|xrobotoolkit_teleop"); do
         log_info "停止进程 (PID: $PID)..."
         kill $PID 2>/dev/null || true
         sleep 0.2
@@ -277,9 +277,9 @@ gnome-terminal --tab --title="ARX-Controllers" -- bash -c "
     # 检查RPC服务端是否已运行
     if ! ss -tuln 2>/dev/null | grep -q ':4242 '; then
         echo '启动 RPC 服务端...' | tee -a '$CONTROLLERS_LOG'
-        cd $ZERORPC_DIR
+        cd $ARX_WORKSPACE
         # 同时输出到终端和日志文件
-        python3 arx_ros2_rpc_server.py 2>&1 | tee -a '$CONTROLLERS_LOG'
+        python3 -m services.rpc.server 2>&1 | tee -a '$CONTROLLERS_LOG'
     else
         echo '⚠️  RPC 服务端已在运行' | tee -a '$CONTROLLERS_LOG'
         read -p '按Enter键关闭终端'

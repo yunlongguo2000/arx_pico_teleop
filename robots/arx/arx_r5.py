@@ -7,8 +7,7 @@ import numpy as np
 import sys
 
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
-from ros2_bridge.arx_ros2_rpc_client import ArxROS2RPCClient
+from arx_client import ArxROS2RPCClient
 
 from lerobot.cameras import make_cameras_from_configs
 from lerobot.utils.errors import DeviceNotConnectedError, DeviceAlreadyConnectedError
@@ -16,9 +15,9 @@ from lerobot.robots.robot import Robot
 from .config_arx_r5 import ARXR5Config
 
 try:
-    from algorithms.calibration import load_calibration_params
-    from algorithms.calibration.board_utils import create_gridboard, create_detector
-    from algorithms.calibration.pose_estimation import (
+    from arx_platform.calibration import load_calibration_params
+    from arx_platform.calibration.board_utils import create_checkerboard_grid, create_detector
+    from arx_platform.calibration.pose_estimation import (
         compute_head_camera_pose, compose_head_camera_pose, pose_to_7dof,
     )
 
@@ -120,7 +119,7 @@ class ARXR5(Robot):
             try:
                 params = load_calibration_params(config.calibration_params_path)
                 bc = params["calibration_board"]
-                self._calib_board = create_gridboard(
+                self._calib_board = create_checkerboard_grid(
                     markers_x=bc["markers_x"], markers_y=bc["markers_y"],
                     marker_length_m=bc["marker_length_m"],
                     marker_separation_m=bc["marker_separation_m"],

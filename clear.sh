@@ -2,7 +2,7 @@
 # 清理所有 ARX 机器人相关后台进程和端口
 #
 # 覆盖范围:
-#   - RPC 服务端 (arx_ros2_rpc_server.py)
+#   - RPC 服务端 (server.py)
 #   - 数据采集 (run_record_arx.py)
 #   - R5 双臂控制器 (R5Controller / launch)
 #   - LIFT 底盘控制器
@@ -19,7 +19,7 @@ echo -e "${YELLOW}清理 ARX 机器人相关进程...${NC}"
 
 # 按依赖顺序: 先上层应用, 再底层控制器
 TARGETS=(
-    "arx_ros2_rpc_server.py"
+    "server.py"
     "run_record_arx.py"
     "R5Controller"
     "open_double_arm"
